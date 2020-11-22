@@ -1,4 +1,5 @@
 import jupyter.wire.kernel;
+import jupyter.wire.log;
 
 abstract class Magic {
   string name;
@@ -31,21 +32,25 @@ struct MagicRunner {
       auto cell_string = join(cell_string_array, "\n");
       foreach (string i; cell_items) {
 	auto c = matchFirst(i, regex(r"^%%([a-zA-Z0-9]+)\s*"));
-	if (c.hit in cell_magic_map) {
+	version(JupyterLogVerbose) log("cell magic ", c[1]);
+	if (c[1] in cell_magic_map) {
 	  cell_magic_map[c.hit].run(i, cell_string);
 	}
       }
       foreach (string i; line_items) {
 	auto c = matchFirst(i, regex(r"^%([a-zA-Z0-9]+)\s*"));
-	if (c.hit in line_magic_map) {
+	version(JupyterLogVerbose) log("line magic ", c[1]);
+	if (c[1] in line_magic_map) {
 	  line_magic_map[c.hit].run(i, "");
 	}
       }
    }
    void register(Magic m) {
      if (m.type == Magic.Type.Line) {
+       version(JupyterLogVerbose) log("adding line magic ", m.name);
        line_magic_map[m.name] = m;
      } else if (m.type == Magic.Type.Cell) {
+       version(JupyterLogVerbose) log("adding cell magic ", m.name);
        cell_magic_map[m.name] = m;
      }
    }

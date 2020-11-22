@@ -12,8 +12,10 @@ class ExampleException: Exception {
 }
 
 class CatMagic : Magic {
-  string name = "cat";
-  Magic.Type type = Magic.Type.Line;
+  this() {
+    name = "cat";
+    type = Magic.Type.Line;
+  }
   override void run(string command, string cell) {
     writeln(command);
   };
