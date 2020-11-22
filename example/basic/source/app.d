@@ -1,6 +1,6 @@
 import jupyter.wire.kernel;
 import jupyter.wire.message : CompleteResult;
-
+import jupyter.wire.magic: magic_runner;
 
 mixin Main!ExampleBackend;
 
