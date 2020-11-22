@@ -1,17 +1,18 @@
 import jupyter.wire.kernel;
 import jupyter.wire.log;
+import std.typecons: tuple, Tuple;
 
 abstract class Magic {
   string name;
   enum Type {Line, Cell};
   Type type;
-  abstract void run(string command, string cell) @safe;
+  abstract ExecutionResult run(string command, string cell) @safe;
 }
 
 struct MagicRunner {
    Magic[string] cell_magic_map;
    Magic[string] line_magic_map;
-   void run(string command) @safe {
+   Tuple!(int, ExecutionResult) run(string command) @safe {
       import std.string;
       import std.regex;
       import std.array : join;
@@ -34,16 +35,17 @@ struct MagicRunner {
 	auto c = matchFirst(i, regex(r"^%%([a-zA-Z0-9]+)\s*"));
 	version(JupyterLogVerbose) log("cell magic ", c[1]);
 	if (c[1] in cell_magic_map) {
-	  cell_magic_map[c.hit].run(i, cell_string);
+	  return tuple(1, cell_magic_map[c[1]].run(i, cell_string));
 	}
       }
       foreach (string i; line_items) {
 	auto c = matchFirst(i, regex(r"^%([a-zA-Z0-9]+)\s*"));
 	version(JupyterLogVerbose) log("line magic ", c[1]);
 	if (c[1] in line_magic_map) {
-	  line_magic_map[c.hit].run(i, "");
+	  return tuple(1, line_magic_map[c[1]].run(i, ""));
 	}
       }
+      return tuple(0,  textResult(""));
    }
    void register(Magic m) {
      if (m.type == Magic.Type.Line) {

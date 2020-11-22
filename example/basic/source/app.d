@@ -16,8 +16,8 @@ class CatMagic : Magic {
     name = "cat";
     type = Magic.Type.Line;
   }
-  override void run(string command, string cell) {
-    writeln(command);
+  override ExecutionResult run(string command, string cell) {
+    return textResult(command);
   };
 }
 
@@ -33,8 +33,10 @@ struct ExampleBackend {
     ExecutionResult execute(in string code, scope IoPubMessageSender sender) @safe {
         import std.conv: text;
 
-	magic_runner.run(code);
-
+	auto c = magic_runner.run(code);
+	if (c[0] == 1) {
+	  return c[1];
+	}
         switch(code) {
         default:
             throw new ExampleException("Unkown command '" ~ code ~ "'");
