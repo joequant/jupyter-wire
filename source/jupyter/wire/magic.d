@@ -4,13 +4,13 @@ abstract class Magic {
   string name;
   enum Type {Line, Cell};
   Type type;
-  abstract void run(string command, string cell);
+  abstract void run(string command, string cell) @safe;
 }
 
 struct MagicRunner {
    Magic[string] cell_magic_map;
    Magic[string] line_magic_map;
-   void run(string command) {
+   void run(string command) @safe {
       import std.string;
       import std.regex;
       import std.array : join;

@@ -1,6 +1,7 @@
 import jupyter.wire.kernel;
 import jupyter.wire.message : CompleteResult;
-import jupyter.wire.magic: magic_runner;
+import jupyter.wire.magic: magic_runner, Magic;
+import std.stdio;
 
 mixin Main!ExampleBackend;
 
@@ -10,6 +11,17 @@ class ExampleException: Exception {
     mixin basicExceptionCtors;
 }
 
+class CatMagic : Magic {
+  string name = "cat";
+  Magic.Type type = Magic.Type.Line;
+  override void run(string command, string cell) {
+    writeln(command);
+  };
+}
+
+static this() {
+  magic_runner.register(new CatMagic);
+}
 
 struct ExampleBackend {
 
@@ -18,6 +30,8 @@ struct ExampleBackend {
 
     ExecutionResult execute(in string code, scope IoPubMessageSender sender) @safe {
         import std.conv: text;
+
+	magic_runner.run(code);
 
         switch(code) {
         default:
