@@ -1,13 +1,15 @@
 import jupyter.wire.kernel;
 
 abstract class Magic {
-   string name;
-   enum Type {Line, Cell};
-   abstract void run(string command, string cell);
+  string name;
+  enum Type {Line, Cell};
+  Type type;
+  abstract void run(string command, string cell);
 }
 
 struct MagicRunner {
-   Magic[string] magic_map;
+   Magic[string] cell_magic_map;
+   Magic[string] line_magic_map;
    void run(string command) {
       import std.string;
       import std.regex;
@@ -28,12 +30,24 @@ struct MagicRunner {
       }
       auto cell_string = join(cell_string_array, "\n");
       foreach (string i; cell_items) {
+	auto c = matchFirst(i, regex(r"^%%([a-zA-Z0-9]+)\s*"));
+	if (c.hit in cell_magic_map) {
+	  cell_magic_map[c.hit].run(i, cell_string);
+	}
       }
       foreach (string i; line_items) {
+	auto c = matchFirst(i, regex(r"^%([a-zA-Z0-9]+)\s*"));
+	if (c.hit in line_magic_map) {
+	  line_magic_map[c.hit].run(i, "");
+	}
       }
    }
    void register(Magic m) {
-   	magic_map[m.name] = m;
+     if (m.type == Magic.Type.Line) {
+       line_magic_map[m.name] = m;
+     } else if (m.type == Magic.Type.Cell) {
+       cell_magic_map[m.name] = m;
+     }
    }
 }
 
